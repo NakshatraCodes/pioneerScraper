@@ -1,0 +1,23 @@
+{
+  "name": "pioneerscraper",
+  "version": "1.0.0",
+  "description": "undefined",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NakshatraCodes/pioneerScraper.git"
+  },
+  "author": "Nakshatra Saxena",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NakshatraCodes/pioneerScraper/issues"
+  },
+  "homepage": "https://github.com/NakshatraCodes/pioneerScraper#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.5",
+    "node-fetch": "^2.6.1"
+  }
+}
