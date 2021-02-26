@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 const cheerio = require("cheerio");
 const fs = require("fs");
 
-const url = `https://www.dailypioneer.com/searchlist.php?section=`;
+const url = `https://timesofindia.indiatimes.com/blogs/toi-editorials/`;
 
 const bulk = [];
 
@@ -24,22 +24,36 @@ const getData = (url) => {
   });
 };
 
-const searchNews = (search, year, page) => {
+const getMoreData = (url) => {
   return new Promise(async (resolve, reject) => {
-    fetch(`${url}&adv=${search}&yr=${year}&page=${page}`)
+    fetch(url)
+      .then((res) => res.text())
+      .then((body) => {
+        const $ = cheerio.load(body);
+        const headline = $(".show-header h1").text();
+        const date = $(".meta span").first().text();
+        // $(".wp-image-132428").remove();
+        $(`img[loading="lazy"]`).remove();
+        const article = $(".main-content p").text();
+        resolve({
+          headline,
+          date,
+          article,
+        });
+      });
+  });
+};
+
+const searchNews = (search, id) => {
+  return new Promise(async (resolve, reject) => {
+    fetch(`${url}/page/${id}/?s=${search}`)
       .then((response) => response.text())
       .then((body) => {
         const $ = cheerio.load(body);
         $("h2 a").each(async (i, element) => {
           const $element = $(element);
           const $url = $element.attr("href");
-          let data = await getData(`https://www.dailypioneer.com${$url}`);
-          bulk.push(data);
-        });
-        $(".highLightedNews h3 a").each(async (i, element) => {
-          const $element = $(element);
-          const $url = $element.attr("href");
-          let data = await getData(`https://www.dailypioneer.com${$url}`);
+          let data = await getMoreData(`${$url}`);
           bulk.push(data);
         });
         resolve(bulk);
@@ -49,19 +63,15 @@ const searchNews = (search, year, page) => {
 
 const func = async () => {
   let data = [];
-  for (var i = 1; i <= 3; i++) {
-    data = await searchNews("farmers+protest", "2021", i.toString());
+  for (var i = 1; i <= 2; i++) {
+    data = await searchNews("galwan-valley", i.toString());
     console.log(`Page ${i} parsed`);
   }
   console.log(data);
-  fs.writeFile(
-    "FARMERSPROTEST2021.txt",
-    JSON.stringify(data, null, 4),
-    (err) => {
-      if (err) throw err;
-      console.log("Saved!");
-    }
-  );
+  fs.writeFile("GalwanValley.txt", JSON.stringify(data, null, 4), (err) => {
+    if (err) throw err;
+    console.log("Saved!");
+  });
 };
 
 func();
