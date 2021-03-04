@@ -3,6 +3,7 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 
 const url = `https://timesofindia.indiatimes.com/blogs/toi-editorials/`;
+const hindustanURL = `https://www.hindustantimes.com/editorials/`;
 
 const bulk = [];
 
@@ -30,8 +31,8 @@ const getMoreData = (url) => {
       .then((res) => res.text())
       .then((body) => {
         const $ = cheerio.load(body);
-        const headline = $(".show-header h1").text();
-        const date = $(".meta span").first().text();
+        const headline = $(".hdg3").text();
+        const date = $(".dateTime").text();
         // $(".wp-image-132428").remove();
         $(`img[loading="lazy"]`).remove();
         const article = $(".main-content p").text();
@@ -46,15 +47,15 @@ const getMoreData = (url) => {
 
 const searchNews = (search, id) => {
   return new Promise(async (resolve, reject) => {
-    fetch(`${url}/page/${id}/?s=${search}`)
+    fetch(`${hindustanURL}/page-${id}/`)
       .then((response) => response.text())
       .then((body) => {
         const $ = cheerio.load(body);
-        $("h2 a").each(async (i, element) => {
+        $(".hdg3 a").each(async (i, element) => {
           const $element = $(element);
           const $url = $element.attr("href");
           let data = await getMoreData(`${$url}`);
-          bulk.push(data);
+          bulk.push(`https://www.hindustantimes.com${$url}`);
         });
         resolve(bulk);
       });
@@ -63,15 +64,15 @@ const searchNews = (search, id) => {
 
 const func = async () => {
   let data = [];
-  for (var i = 1; i <= 2; i++) {
+  for (var i = 1; i <= 1; i++) {
     data = await searchNews("galwan-valley", i.toString());
     console.log(`Page ${i} parsed`);
   }
   console.log(data);
-  fs.writeFile("GalwanValley.txt", JSON.stringify(data, null, 4), (err) => {
-    if (err) throw err;
-    console.log("Saved!");
-  });
+  // fs.writeFile("GalwanValley.txt", JSON.stringify(data, null, 4), (err) => {
+  //   if (err) throw err;
+  //   console.log("Saved!");
+  // });
 };
 
 func();
